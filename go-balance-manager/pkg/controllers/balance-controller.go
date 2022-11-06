@@ -59,7 +59,7 @@ func DeleteBalance(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateBalance(w http.ResponseWriter, r *http.Request) {
-	var balanceUpdate int
+	var balanceUpdate int64
 	utils.ParseBody(r, balanceUpdate)
 	vars := mux.Vars(r)
 	balanceId := vars["balanceId"]
@@ -68,10 +68,45 @@ func UpdateBalance(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("error while parsing")
 	}
 	balanceDetails, db := models.GetBalanceById(ID)
-	balanceDetails.Funds += balanceUpdate
-	db.Save(&balanceDetails)
+	if balanceDetails.Funds <= 10000000-balanceUpdate ||
+		balanceDetails.Funds > 0+balanceUpdate {
+		balanceDetails.Funds += balanceUpdate
+		db.Save(&balanceDetails)
+	}
 	res, _ := json.Marshal(balanceDetails)
 	w.Header().Set("Content-Type", "pkglication/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(res)
+}
+
+func CreateTransfer(w http.ResponseWriter, r *http.Request) {
+	var req = &models.Transfer{}
+	utils.ParseBody(r, req)
+	vars := mux.Vars(r)
+	fromId, err := strconv.ParseInt(vars["fromId"], 0, 0)
+	toId, err1 := strconv.ParseInt(vars["toId"], 0, 0)
+	amount, err2 := strconv.ParseInt(vars["amount"], 0, 0)
+	if err != nil || err1 != nil || err2 != nil {
+		fmt.Println("error while parsing")
+	}
+	fromDetails, db := models.GetBalanceById(fromId)
+	toDetails, _ := models.GetBalanceById(toId)
+	if fromDetails.Funds < amount {
+		fmt.Println("insufficent funds for transfer")
+		return
+	}
+	if toDetails.Funds >= 10000000 {
+		fmt.Println("reciever funds are at max")
+		return
+	}
+	toDetails.Funds += amount
+	fromDetails.Funds -= amount
+	db.Save(&fromDetails)
+	db.Save(&toDetails)
+	left, _ := json.Marshal(fromDetails)
+	right, _ := json.Marshal(toDetails)
+	w.Header().Set("Content-Type", "pkglication/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(left)
+	w.Write(right)
 }

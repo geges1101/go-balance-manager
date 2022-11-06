@@ -9,10 +9,16 @@ var db *gorm.DB
 
 type Balance struct {
 	gorm.Model
-	Id        string `json:"id"`
+	Id        int64  `json:"id"`
 	FirstName string `json:"name"`
 	LastName  string `json:"surname"`
-	Funds     int    `json:"funds"`
+	Funds     int64  `json:"funds"`
+}
+
+type Transfer struct {
+	FromAccountID string `json:"fromId" binding:"required,min=1"`
+	ToAccountID   string `json:"toId" binding:"required,min=1"`
+	Amount        int64  `json:"amount" binding:"required,gt=0"`
 }
 
 func init() {
