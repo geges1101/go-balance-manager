@@ -13,6 +13,13 @@ type Balance struct {
 	FirstName string `json:"name"`
 	LastName  string `json:"surname"`
 	Funds     int64  `json:"funds"`
+	Reserve   int64  `json:"reserve"`
+}
+
+type Order struct {
+	BalanceId int64 `json:"balanceId"`
+	ServiceId int64 `json:"serviceId"`
+	Amount    int64 `json:"amount"`
 }
 
 type Transfer struct {

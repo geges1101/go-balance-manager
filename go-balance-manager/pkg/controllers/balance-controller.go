@@ -59,20 +59,70 @@ func DeleteBalance(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateBalance(w http.ResponseWriter, r *http.Request) {
-	var balanceUpdate int64
-	utils.ParseBody(r, balanceUpdate)
 	vars := mux.Vars(r)
 	balanceId := vars["balanceId"]
+	balanceUpdate := vars["amount"]
 	ID, err := strconv.ParseInt(balanceId, 0, 0)
-	if err != nil {
+	amount, err1 := strconv.ParseInt(balanceUpdate, 0, 0)
+	if err != nil || err1 != nil {
 		fmt.Println("error while parsing")
 	}
 	balanceDetails, db := models.GetBalanceById(ID)
-	if balanceDetails.Funds <= 10000000-balanceUpdate ||
-		balanceDetails.Funds > 0+balanceUpdate {
-		balanceDetails.Funds += balanceUpdate
+	if balanceDetails.Funds <= 10000000-amount ||
+		balanceDetails.Funds >= amount {
+		balanceDetails.Funds += amount
 		db.Save(&balanceDetails)
 	}
+	res, _ := json.Marshal(balanceDetails)
+	w.Header().Set("Content-Type", "pkglication/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(res)
+}
+
+func UpdateReserve(w http.ResponseWriter, r *http.Request) {
+	var req = &models.Order{}
+	utils.ParseBody(r, req)
+	vars := mux.Vars(r)
+	balanceId := vars["balanceId"]
+	balanceUpdate := vars["amount"]
+	ID, err := strconv.ParseInt(balanceId, 0, 0)
+	amount, err1 := strconv.ParseInt(balanceUpdate, 0, 0)
+	if err != nil || err1 != nil {
+		fmt.Println("error while parsing")
+	}
+	balanceDetails, db := models.GetBalanceById(ID)
+	if balanceDetails.Funds >= amount {
+		balanceDetails.Funds -= amount
+		balanceDetails.Reserve += amount
+		db.Save(&balanceDetails)
+	}
+	res, _ := json.Marshal(balanceDetails)
+	w.Header().Set("Content-Type", "pkglication/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(res)
+}
+
+func SubtractRevenue(w http.ResponseWriter, r *http.Request) {
+	var req = &models.Order{}
+	utils.ParseBody(r, req)
+	vars := mux.Vars(r)
+	balanceId := vars["balanceId"]
+	balanceUpdate := vars["amount"]
+	ID, err := strconv.ParseInt(balanceId, 0, 0)
+	amount, err1 := strconv.ParseInt(balanceUpdate, 0, 0)
+	if err != nil || err1 != nil {
+		fmt.Println("error while parsing")
+	}
+	balanceDetails, db := models.GetBalanceById(ID)
+	if balanceDetails.Reserve < amount {
+		fmt.Println("insufficient funds")
+		return
+
+	}
+	balanceDetails.Reserve -= amount
+	db.Save(&balanceDetails)
+	db.Save(req)
+
 	res, _ := json.Marshal(balanceDetails)
 	w.Header().Set("Content-Type", "pkglication/json")
 	w.WriteHeader(http.StatusOK)
