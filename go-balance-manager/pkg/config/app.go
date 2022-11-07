@@ -1,23 +1,22 @@
 package config
 
-import(
+import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
-
 )
 
-var(
-	db * gorm.DB
+var (
+	db *gorm.DB
 )
 
-func Connect(){
-	d, err := gorm.Open("mysql", "geges1101:sqltest1313/simplerest?charset=utf8&parseTime=True&loc=Local")
-	if err != nil{
+func Connect() {
+	d, err := gorm.Open("mysql", "geges:testdata/simplerest?charset=utf8&parseTime=True&loc=Local")
+	if err != nil {
 		panic(err)
 	}
 	db = d
 }
 
-func GetDB() *gorm.DB{
+func GetDB() *gorm.DB {
 	return db
 }
