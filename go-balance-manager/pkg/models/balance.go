@@ -9,7 +9,7 @@ var db *gorm.DB
 
 type Balance struct {
 	gorm.Model
-	Id        int64  `json:"id"`
+	Id        int64  `json:"id" gorm:"column:id;primaryKey"`
 	FirstName string `json:"name"`
 	LastName  string `json:"surname"`
 	Funds     int64  `json:"funds"`
