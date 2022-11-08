@@ -17,9 +17,9 @@ type Balance struct {
 }
 
 type Order struct {
-	BalanceId int64 `json:"balanceId"`
-	ServiceId int64 `json:"serviceId"`
-	Amount    int64 `json:"amount"`
+	BalanceId int64  `json:"balanceId"`
+	ServiceId string `json:"serviceId"`
+	Amount    int64  `json:"amount"`
 }
 
 type Transfer struct {
@@ -56,4 +56,14 @@ func DeleteBalance(ID int64) Balance {
 	var balance Balance
 	db.Where("ID=?", ID).Delete(balance)
 	return balance
+}
+
+func CreateReport(month string) []Order {
+	var Orders []Order
+	var begin string
+	var end string
+	begin += month + "-01 00:00:00"
+	end += month + "-30 23:59:59"
+	db.Where("created_at BETWEEN ? AND ?", begin, end).Find(&Orders)
+	return Orders
 }

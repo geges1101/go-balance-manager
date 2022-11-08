@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -159,4 +160,32 @@ func CreateTransfer(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write(left)
 	w.Write(right)
+}
+
+func CreateReport(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	month := vars["month"]
+
+	if month == "" {
+		fmt.Println("error while parsing")
+	}
+
+	orders := models.CreateReport(month)
+	book := make(map[string]int64)
+	for _, v := range orders {
+		book[v.ServiceId] += v.Amount
+	}
+
+	w.Header().Set("Content-Type", "text/csv")
+	w.Header().Set("Content-Disposition", "attachment;filename=TheCSVFileName.csv")
+
+	wr := csv.NewWriter(w)
+
+	for key, value := range book {
+		err := wr.Write([]string{fmt.Sprintf("%v", key), fmt.Sprintf("%v", value)})
+		if err != nil {
+			http.Error(w, "Error sending csv: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
 }

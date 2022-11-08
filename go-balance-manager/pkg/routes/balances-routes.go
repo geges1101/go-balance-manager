@@ -8,6 +8,7 @@ import (
 var RegisterBalanceRoutes = func(router *mux.Router) {
 	router.HandleFunc("/balance/", controllers.CreateBalance).Methods("POST")
 	router.HandleFunc("/balance/", controllers.GetBalance).Methods("GET")
+	router.HandleFunc("/order/", controllers.CreateReport).Methods("GET")
 	router.HandleFunc("/balance/{balanceId}", controllers.GetBalanceById).Methods("GET")
 	router.HandleFunc("/balance/{balanceId}", controllers.UpdateBalance).Methods("PUT")
 	router.HandleFunc("/balance/{balanceId}", controllers.UpdateReserve).Methods("PUT")
